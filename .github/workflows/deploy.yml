@@ -26,11 +26,9 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      - name: Build
-        run: npm run build
-        env:
-          # GitHub Pages serves the app from /<repo>/
-          PROPSCOUT_BASE: /propscout/
+      # The build uses a relative base, so it needs no per-environment config
+      # and the same artifact works at any sub-path.
+      - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

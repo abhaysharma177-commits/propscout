@@ -2,10 +2,14 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// When deployed to GitHub Pages the app lives at /<repo>/, locally at /.
-// Set PROPSCOUT_BASE=/propscout/ in CI; default to './' so the built folder
-// also works if opened from any sub-path or a static host root.
-const base = process.env.PROPSCOUT_BASE ?? '/';
+/**
+ * A relative base, so one build works everywhere: GitHub Pages at
+ * /<repo>/, a static host root, or a folder opened directly. Combined with
+ * hash routing there is nothing to configure per environment, and no
+ * absolute-path env var to get wrong (Git Bash on Windows rewrites a value
+ * like "/propscout/" into a Windows path, which silently breaks the build).
+ */
+const base = './';
 
 export default defineConfig({
   base,

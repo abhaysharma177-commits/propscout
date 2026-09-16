@@ -37,8 +37,8 @@ const MAX_ROOM = 25;
 const PREMIUM_CLAIM = 0.35;
 const PREMIUM_CAP = 5;
 
-/** How far below the target to open, in percentage points. */
-const OPENING_GAP = 4;
+/** Open this far below your target, as a fraction, leaving room to concede. */
+const OPENING_GAP = 0.04;
 
 export interface LeverageContribution {
   id: string;
@@ -180,19 +180,37 @@ export function estimateNegotiation(p: Property): NegotiationEstimate {
 
   if (isFiniteNumber(asking) && asking > 0) {
     result.askingPrice = asking;
-    const target = asking * (1 - roomPct / 100);
-    const opening = asking * (1 - clamp(roomPct + OPENING_GAP, 0, 40) / 100);
 
-    // Most you should pay: the conservative end of the range, but never above
-    // what the property is worth at the market rate you researched.
-    let walkAway = asking * (1 - roomLowPct / 100);
-    if (isFiniteNumber(marketValue) && marketValue < walkAway) {
-      walkAway = marketValue;
-      notes.push('Walk-away capped at market value — do not pay above the rate you researched.');
+    const target = asking * (1 - roomPct / 100);
+
+    // Most you should pay: the conservative end of the range, pulled down
+    // towards what the property is worth at the market rate you researched.
+    //
+    // The pull stops at the target. A hand-entered locality rate is an average
+    // across all stock, so it cannot be treated as this property's true worth —
+    // a low-density or better-built project sits above the average for reasons
+    // that are not negotiable. Letting it drive the ceiling below the target
+    // would both contradict the target and produce offers nobody would take
+    // seriously.
+    const uncapped = asking * (1 - roomLowPct / 100);
+    let walkAway = uncapped;
+    if (isFiniteNumber(marketValue) && marketValue < uncapped) {
+      walkAway = Math.max(marketValue, target);
+      if (marketValue >= target) {
+        notes.push(
+          'Walk-away pulled down to market value — do not pay above the rate you researched.',
+        );
+      } else {
+        notes.push(
+          'At the rate you entered this is worth less than even the target price. Check the rate, and check whether it is quoted on the same area basis (carpet vs super built-up) before trusting it.',
+        );
+      }
     }
 
+    // Derived from the target rather than the asking price, so the ladder stays
+    // ordered whatever the cap does.
+    result.suggestedOpening = target * (1 - OPENING_GAP);
     result.suggestedTarget = target;
-    result.suggestedOpening = opening;
     result.suggestedWalkAway = walkAway;
     result.estimatedSaving = asking - target;
   }

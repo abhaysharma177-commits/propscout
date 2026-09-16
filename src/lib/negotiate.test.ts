@@ -109,11 +109,20 @@ describe('estimateNegotiation', () => {
     expect(e.contributions.some((c) => c.id === 'lv_above_market')).toBe(true);
   });
 
-  it('caps the walk-away at market value', () => {
-    // Asking 1 Cr, market says it is worth 70 lakh.
+  it('pulls the walk-away down towards market value, but never below the target', () => {
+    // Asking 1 Cr on 2000 sqft; at ₹3,500/sqft the market value is only 70 L.
     const e = estimateNegotiation(flat({ negotiation: { leverage: [], marketRatePerSqft: 3500 } }));
-    expect(e.suggestedWalkAway!).toBeLessThanOrEqual(7_000_000);
-    expect(e.notes.some((n) => n.includes('market value'))).toBe(true);
+    // It is pulled below the un-capped conservative figure...
+    expect(e.suggestedWalkAway!).toBeLessThan(9_400_000);
+    // ...but it still cannot sit under the target, or the advice contradicts itself.
+    expect(e.suggestedWalkAway!).toBeGreaterThanOrEqual(e.suggestedTarget!);
+    expect(e.notes.some((n) => /same area basis|market value/.test(n))).toBe(true);
+  });
+
+  it('warns when the entered rate implies a value below the target', () => {
+    const e = estimateNegotiation(flat({ negotiation: { leverage: [], marketRatePerSqft: 3000 } }));
+    expect(e.suggestedWalkAway).toBe(e.suggestedTarget);
+    expect(e.notes.some((n) => n.includes('carpet vs super built-up'))).toBe(true);
   });
 
   it('gives resale sellers slightly more room than a builder desk', () => {
@@ -228,5 +237,73 @@ describe('calibration against the researched figures', () => {
     expect(e.marketPremiumPct!).toBeGreaterThan(30);
     expect(e.marketContribution).toBeLessThanOrEqual(5);
     expect(e.roomPct).toBeLessThanOrEqual(12);
+  });
+});
+
+describe('the open / aim / never-above ladder is always coherent', () => {
+  /**
+   * Regression: when the market-value cap pulled the walk-away below the
+   * target, the app showed "aim for 1.04 Cr" above "never above 1.01 Cr" —
+   * advice that contradicted itself. The ladder must always be ordered.
+   */
+  it('stays ordered across a wide sweep of prices, areas and market rates', () => {
+    const prices = [2_500_000, 9_000_000, 11_500_000, 25_000_000];
+    const areas = [600, 1400, 1950, 2309, 4000];
+    const rates = [1500, 3500, 5200, 9000, 20_000];
+    const leverageSets: string[][] = [
+      [],
+      ['lv_urgent'],
+      ['lv_x_demand', 'lv_x_rare', 'lv_x_new', 'lv_x_loan', 'lv_x_deadline'],
+      ['lv_urgent', 'lv_defects', 'lv_papers', 'lv_options', 'lv_long_market'],
+    ];
+
+    let checked = 0;
+    for (const askingPrice of prices) {
+      for (const superBuiltUpSqft of areas) {
+        for (const marketRatePerSqft of rates) {
+          for (const leverage of leverageSets) {
+            for (const ageYears of [0, 9]) {
+              const p = flat({
+                superBuiltUpSqft,
+                ageYears,
+                costs: { askingPrice },
+                negotiation: { leverage, marketRatePerSqft },
+              });
+              const e = estimateNegotiation(p);
+              const where = `price=${askingPrice} area=${superBuiltUpSqft} rate=${marketRatePerSqft} lev=${leverage.length} age=${ageYears}`;
+
+              expect(e.suggestedOpening, where).toBeLessThanOrEqual(e.suggestedTarget!);
+              expect(e.suggestedTarget, where).toBeLessThanOrEqual(e.suggestedWalkAway!);
+              expect(e.suggestedWalkAway, where).toBeLessThanOrEqual(askingPrice);
+              expect(e.suggestedOpening, where).toBeGreaterThan(0);
+              for (const v of [e.suggestedOpening, e.suggestedTarget, e.suggestedWalkAway, e.roomPct]) {
+                expect(Number.isFinite(v!), where).toBe(true);
+              }
+              checked++;
+            }
+          }
+        }
+      }
+    }
+    expect(checked).toBe(prices.length * areas.length * rates.length * leverageSets.length * 2);
+  });
+
+  it('reproduces the exact case that was broken', () => {
+    // 1.15 Cr asking on 1,950 sqft against a ₹5,200/sqft market rate.
+    const e = estimateNegotiation(
+      flat({
+        superBuiltUpSqft: 1950,
+        costs: { askingPrice: 11_500_000 },
+        negotiation: { leverage: [], marketRatePerSqft: 5200 },
+      }),
+    );
+    // Before the fix this reported "aim for 1.04 Cr" above "never above 1.01 Cr".
+    expect(e.suggestedTarget!).toBeLessThanOrEqual(e.suggestedWalkAway!);
+    expect(e.suggestedOpening!).toBeLessThan(e.suggestedTarget!);
+    // Market value (1,950 * 5,200 = 1.014 Cr) sits below the target, so the
+    // ceiling settles on the target rather than dropping under it.
+    expect(e.marketValue).toBe(10_140_000);
+    expect(e.suggestedWalkAway).toBe(e.suggestedTarget);
+    expect(e.suggestedTarget!).toBeGreaterThan(10_140_000);
   });
 });
