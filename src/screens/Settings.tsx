@@ -10,6 +10,7 @@ import {
   Select,
   Stat,
   Switch,
+  TextInput,
   useToast,
 } from '../components/ui';
 import {
@@ -187,6 +188,20 @@ export function Settings() {
             hint="Hides the nice-to-have checks so the on-site flow stays short"
             checked={settings.visitModeEssentialsOnly}
             onChange={(v) => void updateSettings({ visitModeEssentialsOnly: v })}
+          />
+        </div>
+      </Section>
+
+      {/* -------------------------------------------------- trip */}
+      <Section title="Your trip">
+        <div className="card card--pad">
+          <TextInput
+            label="Where you set out from each day"
+            hint="Your hotel or the airport. The whole-day route in the Plan tab starts here."
+            placeholder="e.g. Hotel name, Jaipur"
+            value={settings.homeBase}
+            onChange={(v) => void updateSettings({ homeBase: v })}
+            full
           />
         </div>
       </Section>

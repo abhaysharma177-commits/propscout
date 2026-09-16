@@ -15,9 +15,14 @@ function byTime(a: Property, b: Property): number {
   return (a.brief?.rank ?? 99) - (b.brief?.rank ?? 99);
 }
 
-/** Google Maps link covering every stop of a day in order. */
-function dayRouteUrl(stops: Property[]): string | undefined {
-  const terms = stops.map(locationTerm).filter((t): t is string => Boolean(t));
+/**
+ * Google Maps link covering every stop of a day in order, starting from
+ * wherever you set out (hotel, airport) so the first leg is useful too.
+ */
+function dayRouteUrl(stops: Property[], homeBase?: string): string | undefined {
+  const stopTerms = stops.map(locationTerm).filter((t): t is string => Boolean(t));
+  const start = homeBase?.trim();
+  const terms = start ? [start, ...stopTerms] : stopTerms;
   if (terms.length < 2) return undefined;
   const origin = encodeURIComponent(terms[0]!);
   const destination = encodeURIComponent(terms[terms.length - 1]!);
@@ -103,7 +108,7 @@ function Stop({
 }
 
 export function Planner() {
-  const { properties, ready } = useStore();
+  const { properties, ready, settings } = useStore();
 
   const { days, unscheduled } = useMemo(() => {
     const active = properties.filter((p) => !p.archived);
@@ -165,7 +170,7 @@ export function Planner() {
       </Note>
 
       {days.map(({ day, stops }) => {
-        const route = dayRouteUrl(stops);
+        const route = dayRouteUrl(stops, settings.homeBase);
         const doneCount = stops.filter((p) => p.status !== 'to_visit').length;
         return (
           <Section key={day} title={`Day ${day}`}>

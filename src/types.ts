@@ -32,7 +32,6 @@ export interface PropertyCosts {
   askingPrice?: number;
   /** Quote the seller has come down to most recently, if different. */
   lastQuote?: number;
-  bookingAmount?: number;
   parkingCharge?: number;
   clubhouseCharge?: number;
   /** Preferred Location Charge (corner / park facing / low floor). */
@@ -56,7 +55,6 @@ export interface PropertyCosts {
 export interface Negotiation {
   /** Going rate per sqft in this locality, from your own research. */
   marketRatePerSqft?: number;
-  openingOffer?: number;
   targetPrice?: number;
   walkAwayPrice?: number;
   /** ids from LEVERAGE catalogue that apply to this deal. */
@@ -249,7 +247,6 @@ export interface MediaMeta {
   durationSec?: number;
   width?: number;
   height?: number;
-  favorite?: boolean;
   createdAt: number;
 }
 
@@ -277,6 +274,7 @@ export interface Settings {
   /** Longest side in px that captured photos are downscaled to. */
   photoMaxEdge: number;
   city: string;
+  /** Where you set out from each day — drives the trip route origin. */
   homeBase: string;
 }
 
