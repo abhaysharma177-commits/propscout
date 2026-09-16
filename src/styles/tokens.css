@@ -1,0 +1,203 @@
+/* Design tokens, reset and typography.
+   Sizing is deliberately generous: every tap target is at least 48px and the
+   base font size can be pushed to 21px from Settings, because this app gets
+   used one-handed, outdoors, in bright sun, sometimes by people in their 70s. */
+
+:root {
+  --bg: #faf9f6;
+  --bg-tint: #f3f1ea;
+  --surface: #ffffff;
+  --surface-2: #f7f6f2;
+
+  --ink: #14201b;
+  --ink-2: #4c5a54;
+  --ink-3: #7d8a84;
+
+  --line: #e3e1da;
+  --line-strong: #cfcdc4;
+
+  --accent: #1c6b52;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6f1ec;
+  --accent-line: #b9d8cb;
+
+  --good: #17704a;
+  --good-soft: #e4f2ea;
+  --warn: #9c6207;
+  --warn-soft: #fbf0dd;
+  --bad: #ab2b21;
+  --bad-soft: #fbe9e7;
+  --info: #1f5b86;
+  --info-soft: #e7f0f7;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+
+  --shadow: 0 1px 2px rgba(20, 32, 27, 0.05), 0 2px 8px rgba(20, 32, 27, 0.04);
+  --shadow-lift: 0 4px 16px rgba(20, 32, 27, 0.1);
+
+  --tap: 48px;
+  --nav-h: 66px;
+  --header-h: 56px;
+  --pad: 16px;
+
+  --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif;
+
+  font-size: 19px;
+}
+
+:root[data-text='normal'] {
+  font-size: 17px;
+}
+:root[data-text='large'] {
+  font-size: 19px;
+}
+:root[data-text='xlarge'] {
+  font-size: 21px;
+}
+
+:root[data-theme='dark'] {
+  --bg: #101815;
+  --bg-tint: #17211d;
+  --surface: #1a2420;
+  --surface-2: #212c27;
+
+  --ink: #eef2f0;
+  --ink-2: #b3c0ba;
+  --ink-3: #8a968f;
+
+  --line: #2c3833;
+  --line-strong: #3d4a44;
+
+  --accent: #4fbf94;
+  --accent-ink: #06231a;
+  --accent-soft: #1b3830;
+  --accent-line: #2f5c4c;
+
+  --good: #58c68f;
+  --good-soft: #17302a;
+  --warn: #d9a443;
+  --warn-soft: #33290f;
+  --bad: #f08b80;
+  --bad-soft: #3a1f1c;
+  --info: #7cb6dd;
+  --info-soft: #14283a;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-lift: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior-y: none;
+}
+
+#root {
+  min-height: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+h2 {
+  font-size: 1.2rem;
+}
+h3 {
+  font-size: 1.05rem;
+}
+h4 {
+  font-size: 0.95rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* Visible focus for keyboard users, invisible for touch. */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
