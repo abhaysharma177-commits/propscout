@@ -1,5 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/ui';
+import { Welcome } from './components/Welcome';
 import { StoreProvider } from './lib/store';
 import { Compare } from './screens/Compare';
 import { Guide } from './screens/Guide';
@@ -16,23 +18,26 @@ import { VisitMode } from './screens/VisitMode';
  */
 export default function App() {
   return (
-    <StoreProvider>
-      <ToastProvider>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<Properties />} />
-            <Route path="/new" element={<PropertyForm />} />
-            <Route path="/p/:id" element={<PropertyDetail />} />
-            <Route path="/p/:id/edit" element={<PropertyForm />} />
-            <Route path="/p/:id/visit" element={<VisitMode />} />
-            <Route path="/plan" element={<Planner />} />
-            <Route path="/compare" element={<Compare />} />
-            <Route path="/guide" element={<Guide />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </HashRouter>
-      </ToastProvider>
-    </StoreProvider>
+    <ErrorBoundary>
+      <StoreProvider>
+        <ToastProvider>
+          <Welcome />
+          <HashRouter>
+            <Routes>
+              <Route path="/" element={<Properties />} />
+              <Route path="/new" element={<PropertyForm />} />
+              <Route path="/p/:id" element={<PropertyDetail />} />
+              <Route path="/p/:id/edit" element={<PropertyForm />} />
+              <Route path="/p/:id/visit" element={<VisitMode />} />
+              <Route path="/plan" element={<Planner />} />
+              <Route path="/compare" element={<Compare />} />
+              <Route path="/guide" element={<Guide />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </HashRouter>
+        </ToastProvider>
+      </StoreProvider>
+    </ErrorBoundary>
   );
 }

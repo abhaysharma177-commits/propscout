@@ -184,6 +184,41 @@ function draw(size, { maskable }) {
   return out;
 }
 
+
+/**
+ * 1200x630 card for link previews (WhatsApp, iMessage, Slack). Just the mark on
+ * a warm background — the title and description come from the meta tags, so the
+ * image only has to look deliberate at thumbnail size.
+ */
+function socialCard(width, height) {
+  const out = Buffer.alloc(width * height * 4);
+  for (let i = 0; i < width * height; i++) {
+    out[i * 4] = CREAM[0];
+    out[i * 4 + 1] = CREAM[1];
+    out[i * 4 + 2] = CREAM[2];
+    out[i * 4 + 3] = 255;
+  }
+
+  const logoSize = Math.round(Math.min(width, height) * 0.52);
+  const logo = draw(logoSize, { maskable: false });
+  const ox = Math.round((width - logoSize) / 2);
+  const oy = Math.round((height - logoSize) / 2);
+
+  for (let y = 0; y < logoSize; y++) {
+    for (let x = 0; x < logoSize; x++) {
+      const si = (y * logoSize + x) * 4;
+      const a = logo[si + 3] / 255;
+      if (a === 0) continue;
+      const di = ((oy + y) * width + (ox + x)) * 4;
+      for (let c = 0; c < 3; c++) {
+        out[di + c] = Math.round(logo[si + c] * a + out[di + c] * (1 - a));
+      }
+      out[di + 3] = 255;
+    }
+  }
+  return out;
+}
+
 const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <rect width="100" height="100" rx="22" fill="#1c6b52"/>
   <path d="M50 19 L81 63 L19 63 Z M31 61 h38 v20 h-38 Z" fill="#faf9f6"/>
@@ -205,6 +240,9 @@ for (const [name, size, opts] of targets) {
   writeFileSync(resolve(OUT, name), encodePng(size, size, draw(size, opts)));
   console.log(`wrote ${name} (${size}x${size})`);
 }
+
+writeFileSync(resolve(OUT, 'social-card.png'), encodePng(1200, 630, socialCard(1200, 630)));
+console.log('wrote social-card.png (1200x630)');
 
 writeFileSync(resolve(OUT, 'favicon.svg'), SVG);
 console.log('wrote favicon.svg');

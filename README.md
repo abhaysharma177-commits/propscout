@@ -11,10 +11,12 @@ server and no network call.
 
 ---
 
-## Put it on your phone
+## Install it
 
-Open the app URL in your phone's browser, then add it to your home screen. After
-that it opens full screen and works with no signal at all.
+### 👉 https://abhaysharma177-commits.github.io/propscout/
+
+Open that on your phone, then add it to your home screen. After that it opens
+full screen and works with no signal at all.
 
 **iPhone (Safari)** — tap the Share button, scroll down, tap **Add to Home
 Screen**, then **Add**.
@@ -25,6 +27,25 @@ Home screen**). You may also get an install banner at the bottom.
 
 Installing matters for more than convenience: browsers are far less likely to
 clear the stored data of an installed app, and your photos live in that storage.
+
+---
+
+## Sharing it with other people
+
+**Settings → Share** has three buttons:
+
+- **Share the app link** — sends the install URL. Whoever opens it gets the full
+  shortlist, prices, checklists and all the briefing research immediately,
+  because that data ships inside the app. Their photos and notes stay on their
+  own phone.
+- **Send my notes & photos** — hands the whole backup zip straight to WhatsApp,
+  Mail or AirDrop. The recipient opens PropScout and uses **Settings → Restore**
+  to load your photos, checklist answers and ratings onto their phone.
+- **Send a summary** — readable text, for someone who doesn't want the app.
+
+There is deliberately **no account and no cloud sync**. Each phone holds its own
+data and you move it around explicitly. That keeps the app usable with no signal
+at a construction site, and means your photos are never uploaded anywhere.
 
 ---
 

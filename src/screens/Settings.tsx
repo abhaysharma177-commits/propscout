@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Screen } from '../components/AppShell';
 import { NumberInput } from '../components/MoneyInput';
+import { InstallCard } from '../components/Welcome';
 import {
   Accordion,
   Bar,
@@ -23,6 +24,7 @@ import {
 } from '../lib/backup';
 import { storageInfo, wipeAll, type StorageInfo } from '../lib/db';
 import { formatBytes } from '../lib/media';
+import { OUTCOME_MESSAGE, shareAppLink, shareBackup, shareSummary } from '../lib/share';
 import { effectiveStampDutyPct, useStore } from '../lib/store';
 
 export function Settings() {
@@ -57,12 +59,75 @@ export function Settings() {
 
   return (
     <Screen title="Settings">
+      {/* -------------------------------------------------- share */}
+      <Section title="Share">
+        <Note tone="accent" icon="📲">
+          <strong>Send the app to someone.</strong> One link installs on both iPhone and Android,
+          and they get the whole shortlist and all the research straight away. Their own photos and
+          notes stay private to their phone.
+        </Note>
+
+        <button
+          type="button"
+          className="btn btn--primary btn--lg btn--block"
+          disabled={busy !== null}
+          onClick={() =>
+            run('link', async () => {
+              const outcome = await shareAppLink();
+              if (OUTCOME_MESSAGE[outcome]) show(OUTCOME_MESSAGE[outcome]);
+            })
+          }
+        >
+          {busy === 'link' ? 'Opening…' : '🔗 Share the app link'}
+        </button>
+
+        <div className="btnrow">
+          <button
+            type="button"
+            className="btn"
+            disabled={busy !== null}
+            onClick={() =>
+              run('sharezip', async () => {
+                const outcome = await shareBackup(setProgress);
+                if (OUTCOME_MESSAGE[outcome]) show(OUTCOME_MESSAGE[outcome]);
+              })
+            }
+          >
+            {busy === 'sharezip' ? 'Preparing…' : '📤 Send my notes & photos'}
+          </button>
+          <button
+            type="button"
+            className="btn"
+            disabled={busy !== null}
+            onClick={() =>
+              run('sharesum', async () => {
+                const outcome = await shareSummary();
+                if (OUTCOME_MESSAGE[outcome]) show(OUTCOME_MESSAGE[outcome]);
+              })
+            }
+          >
+            {busy === 'sharesum' ? 'Preparing…' : '📝 Send a summary'}
+          </button>
+        </div>
+
+        <p className="tiny muted-3">
+          “Send my notes &amp; photos” hands the whole backup to WhatsApp, Mail or AirDrop. Whoever
+          receives it opens PropScout and uses Restore below. “Send a summary” is readable text for
+          someone who does not want the app.
+        </p>
+      </Section>
+
+      {/* -------------------------------------------------- install */}
+      <Section title="Install on this device">
+        <InstallCard />
+      </Section>
+
       {/* -------------------------------------------------- backup */}
       <Section title="Backup — do this every evening">
         <Note tone="warn" icon="⚠️">
           Everything lives on this phone only. Nothing is uploaded anywhere. If you clear your
           browser data or lose the phone, it is gone — so export a backup at the end of each day of
-          visits and email the file to yourself.
+          visits and send the file to yourself.
         </Note>
 
         <button
